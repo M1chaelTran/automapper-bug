@@ -9,13 +9,10 @@ namespace AutoMapperBug
 		private static void Main(string[] args)
 		{
 			Mapper.CreateMap<UserDataModel, UserDomain>()
-				.ConstructUsing(x => new UserDomain(x.UserName, x.Phone));
+				.ConstructUsing(x => new UserDomain(x.UserName, x.Phone))
+				.IgnoreAllPropertiesWithAnInaccessibleSetter();
 
-			var databaseUsers = new List<UserDataModel>
-								{
-									new UserDataModel {UserName = "test user", Phone = "123", Password = "hidden"},
-									new UserDataModel {UserName = "admin", Phone = "911", Password = "secret"}
-								};
+			var databaseUsers = GetDatabaseUser();
 
 			var domainUsers = Mapper.Map<List<UserDomain>>(databaseUsers);
 
@@ -23,25 +20,14 @@ namespace AutoMapperBug
 
 			Console.ReadLine();
 		}
-	}
 
-	public class UserDomain
-	{
-		public UserDomain(string name, string phone)
+		private static List<UserDataModel> GetDatabaseUser()
 		{
-			Name = name == "admin" ? "You're an admin" : name;
-			Phone = phone == "911" ? "000" : phone;
+			return new List<UserDataModel>
+					{
+						new UserDataModel {UserName = "test user", Phone = "123", Password = "hidden"},
+						new UserDataModel {UserName = "admin", Phone = "911", Password = "secret"}
+					};
 		}
-
-		public string Name { get; private set; }
-		public string Phone { get; private set; }
-		public string Password { get; private set; }
-	}
-
-	public class UserDataModel
-	{
-		public string UserName { get; set; }
-		public string Phone { get; set; }
-		public string Password { get; set; }
 	}
 }
